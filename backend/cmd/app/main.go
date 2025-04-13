@@ -62,6 +62,12 @@ func main() {
 				})
 				return
 			}
+			if request.Limit == 0 {
+				request.Limit = 10
+			}
+			if request.Offset == 0 {
+				request.Offset = 0
+			}
 			response, err := openweatherService.GetHistory(request.Limit, request.Offset)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{

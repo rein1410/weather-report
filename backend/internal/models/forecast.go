@@ -6,13 +6,14 @@ import (
 
 type Forecast struct {
 	Dt   int64 `json:"dt" gorm:"primaryKey;uniqueIndex:idx_dt"`
-	Temp datatypes.JSONType[struct {
-		Min float32 `json:"min"`
-		Max float32 `json:"max"`
-	}] `json:"temp"`
-	Pressure uint32 `json:"pressure"`
-	Humidity uint32 `json:"humidity"`
-	Clouds   datatypes.JSONType[struct {
+	Main datatypes.JSONType[struct {
+		Temp     float32 `json:"temp"`
+		TempMin  float32 `json:"temp_min"`
+		TempMax  float32 `json:"temp_max"`
+		Pressure float32 `json:"pressure"`
+		Humidity float32 `json:"humidity"`
+	}] `json:"main"`
+	Clouds datatypes.JSONType[struct {
 		All uint32 `json:"all"`
 	}] `json:"clouds"`
 }

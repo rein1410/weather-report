@@ -55,11 +55,13 @@ func (s *OpenWeatherService) GetDailyForecast() (DailyForecastResponse, error) {
 func (s *OpenWeatherService) GetHistory(limit int, offset int) (HistoryResponse, error) {
 	var forecasts []models.Forecast
 	result := s.db.Order("dt DESC").Limit(limit).Offset(offset).Find(&forecasts)
+	var total int64
+	s.db.Model(&models.Forecast{}).Count(&total)
 	if result.Error != nil {
 		return HistoryResponse{}, result.Error
 	}
 	return HistoryResponse{
-		Total: result.RowsAffected,
+		Total: total,
 		List:  forecasts,
 	}, nil
 }
