@@ -4,21 +4,17 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"weather-report/config"
+	"weather-report/internal/database"
 	"weather-report/internal/models"
 	"weather-report/internal/services"
+	pagination "weather-report/pkg"
 
 	"github.com/gin-gonic/gin"
 )
 
-type HistoryRequest struct {
-	Limit  int `form:"limit"`
-	Offset int `form:"offset"`
-}
-
 func main() {
 	// Initialize database
-	db, err := config.NewPostgresConnection()
+	db, err := database.NewPostgresConnection()
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
@@ -54,21 +50,27 @@ func main() {
 			c.JSON(http.StatusOK, response)
 		})
 		api.GET("/history", func(c *gin.Context) {
+			config := pagination.EndpointConfig{
+				AllowedFilters: map[string]bool{
+					"dt": true,
+				},
+				AllowedSorts: map[string]bool{
+					"dt":       true,
+					"temp":     true,
+					"pressure": true,
+					"humidity": true,
+					"clouds":   true,
+				},
+			}
 			openweatherService := services.NewOpenWeatherService(db)
-			var request HistoryRequest
-			if err := c.ShouldBind(&request); err != nil {
+			options, err := pagination.ParseQueryOptions(c, config)
+			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"error": err.Error(),
 				})
 				return
 			}
-			if request.Limit == 0 {
-				request.Limit = 10
-			}
-			if request.Offset == 0 {
-				request.Offset = 0
-			}
-			response, err := openweatherService.GetHistory(request.Limit, request.Offset)
+			response, err := openweatherService.GetHistory(options)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),

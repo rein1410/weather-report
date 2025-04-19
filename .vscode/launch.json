@@ -10,6 +10,9 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/backend/cmd/app/main.go",
+            "env": {
+                "OPENWEATHER_API_KEY": "af5f97846927e8834186f43b99334bb8"
+            }
         }
     ]
 }
