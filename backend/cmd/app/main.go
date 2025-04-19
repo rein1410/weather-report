@@ -52,7 +52,11 @@ func main() {
 		api.GET("/history", func(c *gin.Context) {
 			config := pagination.EndpointConfig{
 				AllowedFilters: map[string]bool{
-					"dt": true,
+					"dt":       true,
+					"temp":     true,
+					"pressure": true,
+					"humidity": true,
+					"clouds":   true,
 				},
 				AllowedSorts: map[string]bool{
 					"dt":       true,

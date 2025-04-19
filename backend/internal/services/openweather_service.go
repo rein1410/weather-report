@@ -27,55 +27,34 @@ var changiAirportCoordinates = Coordinates{
 }
 
 type OpenWeatherService struct {
-	db           *gorm.DB
-	queryBuilder *QueryBuilderService
-}
-
-type ForecastQueryOptions struct {
-	pagination.QueryOptions
-	Dt       pagination.NumberFilter
-	Temp     pagination.NumberFilter
-	Pressure pagination.NumberFilter
-	Humidity pagination.NumberFilter
-	Clouds   pagination.NumberFilter
+	db         *gorm.DB
+	pagination *PaginationService
 }
 
 func NewOpenWeatherService(db *gorm.DB) *OpenWeatherService {
-	return &OpenWeatherService{db: db, queryBuilder: NewQueryBuilderService(db)}
+	return &OpenWeatherService{db: db, pagination: NewPaginationService(db)}
 }
 
-type ForcastResponse struct {
-	pagination.Pagination
-	List interface{} `json:"list"`
-}
-
-func (s *OpenWeatherService) GetDailyForecast() (ForcastResponse, error) {
+func (s *OpenWeatherService) GetDailyForecast() (pagination.PaginationResponse, error) {
 	result, err := s.callApiInternal(changiAirportCoordinates)
 	if err != nil {
-		return ForcastResponse{}, err
+		return pagination.PaginationResponse{}, err
 	}
 	go s.generateHistory(result)
 
 	return result, nil
 }
 
-func (s *OpenWeatherService) GetHistory(request pagination.QueryOptions) (ForcastResponse, error) {
+func (s *OpenWeatherService) GetHistory(request pagination.QueryOptions) (*pagination.PaginationResponse, error) {
 	var forecasts []models.Forecast
-	query := s.queryBuilder.Build(&forecasts, &request).Find(&forecasts)
-	var total int64
-	s.db.Model(&models.Forecast{}).Count(&total)
-	if query.Error != nil {
-		return ForcastResponse{}, query.Error
+	response, err := s.pagination.QueryAndPaginate(forecasts, &request)
+	if err != nil {
+		return nil, err
 	}
-	return ForcastResponse{
-		List: forecasts,
-		Pagination: pagination.Pagination{
-			Total: total,
-		},
-	}, nil
+	return response, nil
 }
 
-func (s *OpenWeatherService) generateHistory(respose ForcastResponse) {
+func (s *OpenWeatherService) generateHistory(respose pagination.PaginationResponse) {
 	// Bulk insert the data, skip any that violates unique constraint
 	tx := s.db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(respose.List, 100)
 	if tx.Error != nil {
@@ -83,29 +62,29 @@ func (s *OpenWeatherService) generateHistory(respose ForcastResponse) {
 	}
 }
 
-func (s *OpenWeatherService) callApiInternal(coords Coordinates) (ForcastResponse, error) {
+func (s *OpenWeatherService) callApiInternal(coords Coordinates) (pagination.PaginationResponse, error) {
 	url := fmt.Sprintf("%s/forecast?lat=%f&lon=%f&appid=%s", openWeatherUrl, coords.Latitude, coords.Longitude, apiKeyEnv)
 	resp, err := http.Get(url)
 	if err != nil {
-		return ForcastResponse{}, err
+		return pagination.PaginationResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return ForcastResponse{}, fmt.Errorf("OpenWeather API request failed with status: %d", resp.StatusCode)
+		return pagination.PaginationResponse{}, fmt.Errorf("OpenWeather API request failed with status: %d", resp.StatusCode)
 	}
 
 	var result map[string]interface{}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return ForcastResponse{}, fmt.Errorf("error parsing JSON: %w", err)
+		return pagination.PaginationResponse{}, fmt.Errorf("error parsing JSON: %w", err)
 	}
 	// Map the data to the DailyForecastResponse struct
 	list, err := s.mapToForecast(result)
 	if err != nil {
-		return ForcastResponse{}, err
+		return pagination.PaginationResponse{}, err
 	} else {
-		return ForcastResponse{List: list}, nil
+		return pagination.PaginationResponse{List: list}, nil
 	}
 
 }

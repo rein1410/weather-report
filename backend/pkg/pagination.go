@@ -1,31 +1,36 @@
 package pagination
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Pagination struct {
-	Total int64 `json:"total"`
-	Page  int64 `json:"page"`
+type PaginationResponse struct {
+	Total      int64       `json:"total"`
+	TotalPages int64       `json:"total_pages"`
+	Page       int64       `json:"page"`
+	List       interface{} `json:"list"`
 }
 
 type QueryOptions struct {
-	Limit  int `form:"limit"`
-	Offset int `form:"offset"`
-	// Filters map[string]string    `form:"filters"`
-	Sort map[string]SortOrder `form:"sort"`
+	Limit   int                                  `form:"limit"`
+	Offset  int                                  `form:"offset"`
+	Filters map[string]map[FilterOperator]string `form:"filters"`
+	Sort    map[string]SortOrder                 `form:"sort"`
 }
 
-type NumberFilter struct {
-	Eq  float64 `form:"eq"`
-	Gt  float64 `form:"gt"`
-	Lt  float64 `form:"lt"`
-	Gte float64 `form:"gte"`
-	Lte float64 `form:"lte"`
-}
+type FilterOperator string
+
+const (
+	FilterOperatorEq  FilterOperator = "eq"
+	FilterOperatorGt  FilterOperator = "gt"
+	FilterOperatorLt  FilterOperator = "lt"
+	FilterOperatorGte FilterOperator = "gte"
+	FilterOperatorLte FilterOperator = "lte"
+)
 
 type SortOrder string
 
@@ -41,20 +46,53 @@ type EndpointConfig struct {
 
 func ParseQueryOptions(c *gin.Context, config EndpointConfig) (QueryOptions, error) {
 	options := QueryOptions{
-		// Filters: make(map[string]string),
-		Sort: make(map[string]SortOrder),
+		Sort:    make(map[string]SortOrder),
+		Filters: make(map[string]map[FilterOperator]string),
 	}
 
 	limit, err := strconv.Atoi(c.Query("limit"))
 	if err != nil || limit < 0 {
 		limit = 10
-		options.Limit = limit
 	}
+	options.Limit = limit
 
-	offset, err := strconv.Atoi(c.Query("offset"))
-	if err != nil || offset < 0 {
-		offset = 0
-		options.Offset = offset
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil || page < 0 {
+		page = 0
+	}
+	options.Offset = page * limit
+
+	if filterParam := c.Query("filters"); filterParam != "" {
+		filters := strings.Split(filterParam, ",")
+		for _, filter := range filters {
+			// example: dt:eq:2025-04-19
+			filter = strings.TrimSpace(filter)
+			parts := strings.Split(filter, ":")
+			if len(parts) != 3 {
+				return QueryOptions{}, fmt.Errorf("invalid filter format: %s", filter)
+			}
+			key := parts[0]
+			operator := parts[1]
+			value := parts[2]
+			if _, allowed := config.AllowedFilters[key]; !allowed {
+				return QueryOptions{}, fmt.Errorf("invalid filter key: %s", key)
+			}
+			options.Filters[key] = make(map[FilterOperator]string)
+			switch operator {
+			case "eq":
+				options.Filters[key][FilterOperatorEq] = value
+			case "gt":
+				options.Filters[key][FilterOperatorGt] = value
+			case "lt":
+				options.Filters[key][FilterOperatorLt] = value
+			case "gte":
+				options.Filters[key][FilterOperatorGte] = value
+			case "lte":
+				options.Filters[key][FilterOperatorLte] = value
+			default:
+				return QueryOptions{}, fmt.Errorf("invalid filter operator: %s", operator)
+			}
+		}
 	}
 
 	// Parse filters
@@ -71,7 +109,7 @@ func ParseQueryOptions(c *gin.Context, config EndpointConfig) (QueryOptions, err
 	// }
 
 	// Parse sorting
-	if sortParam := c.Query("sort"); sortParam != "" {
+	if sortParam := c.Query("sorts"); sortParam != "" {
 		sortFields := strings.Split(sortParam, ",")
 
 		for _, field := range sortFields {
