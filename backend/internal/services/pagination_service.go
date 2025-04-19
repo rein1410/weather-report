@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"math"
+	"strings"
 	pagination "weather-report/pkg"
 
 	"gorm.io/gorm"
@@ -33,6 +34,8 @@ func (s *PaginationService) QueryAndPaginate(model interface{}, options *paginat
 				query = query.Where(fmt.Sprintf("%s >= ?", field), value)
 			case pagination.FilterOperatorLte:
 				query = query.Where(fmt.Sprintf("%s <= ?", field), value)
+			case pagination.FilterOperatorIn:
+				query = query.Where(fmt.Sprintf("%s IN (?)", field), strings.Split(value, ","))
 			}
 		}
 	}

@@ -1,15 +1,35 @@
 import { Forecast } from "../data/forecast";
 import { columns } from "../data/history";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-
+import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
+import { ForecastFilters } from "@/components/ui/forecast-filters";
 export default async function History() {
     const page = 0;
     const limit = 10;
     
-    const queryFn = async (pageIndex: number, pageSize: number) => {
+    const queryFn = async (pageIndex: number, pageSize: number, sorting?: SortingState, filter?: ColumnFiltersState) => {
         "use server";
         try {
-            const response = await fetch(`${process.env.BACKEND_URL}/api/history?page=${pageIndex}&limit=${pageSize}`);
+            // Build the URL with pagination parameters
+            let url = `${process.env.BACKEND_URL}/api/history?page=${pageIndex}&limit=${pageSize}`;
+            
+            // Add sorting parameters if provided
+            if (sorting && sorting.length > 0) {
+                const sortParams = sorting.map(sort => {
+                    // Format: -field for descending, field for ascending
+                    return sort.desc ? `-${sort.id}` : sort.id;
+                }).join(';');
+                
+                url += `&sorts=${sortParams}`;
+            }
+            if (filter && filter.length > 0) {
+                const filterParams = filter.map(filter => {
+                    return filter.id + ":" + filter.value;
+                }).join(',');
+                url += `&filters=${filterParams}`;
+            }
+            console.log(url);
+            const response = await fetch(url);
             
             if (!response.ok) {
                 console.error(`Error fetching data: ${response.status} ${response.statusText}`);
@@ -36,6 +56,8 @@ export default async function History() {
                 pageIndex={page} 
                 pageSize={limit}
                 queryFn={queryFn} 
+                rowId="dt"
+                filterUI={ForecastFilters}
             />
         </div>
     );

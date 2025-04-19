@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-import { Forecast } from "./forecast";
+import { Forecast, SortableColumn } from "./forecast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ForecastMenu } from "@/components/ui/forecast-menu";
 
@@ -39,13 +39,9 @@ export const columns: ColumnDef<Forecast>[] = [
     accessorKey: "dt",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <SortableColumn column={column}>
           Date & Time
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        </SortableColumn>
       );
     },
     cell: ({ row }) => {
@@ -56,7 +52,13 @@ export const columns: ColumnDef<Forecast>[] = [
   },
   {
     accessorKey: "temp",
-    header: "Temperature (°C)",
+    header: ({ column }) => {
+      return (
+        <SortableColumn column={column}>
+          Temperature (°C)
+        </SortableColumn>
+      );
+    },
     cell: ({ row }) => {
       //Convert kelvin to celsius
       const temp = row.original.temp - 273.15;
@@ -66,7 +68,13 @@ export const columns: ColumnDef<Forecast>[] = [
   },
   {
     accessorKey: "pressure",
-    header: "Pressure (hPa)",
+    header: ({ column }) => {
+      return (
+        <SortableColumn column={column}>
+          Pressure (hPa)
+        </SortableColumn>
+      );
+    },
     cell: ({ row }) => {
       return row.original.pressure.toFixed(2);
     },
@@ -74,7 +82,13 @@ export const columns: ColumnDef<Forecast>[] = [
   },
   {
     accessorKey: "humidity",
-    header: "Humidity (%)",
+    header: ({ column }) => {
+      return (
+        <SortableColumn column={column}>
+          Humidity (%)
+        </SortableColumn>
+      );
+    },
     cell: ({ row }) => {
       return row.original.humidity.toFixed(2);
     },
@@ -82,7 +96,13 @@ export const columns: ColumnDef<Forecast>[] = [
   },
   {
     accessorKey: "clouds",
-    header: "Clouds (%)",
+    header: ({ column }) => {
+      return (
+        <SortableColumn column={column}>
+          Clouds (%)
+        </SortableColumn>
+      );
+    },
     cell: ({ row }) => {
       return row.original.clouds.toFixed(2);
     },

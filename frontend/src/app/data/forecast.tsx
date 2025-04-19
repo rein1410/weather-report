@@ -14,7 +14,7 @@ export type Forecast = {
     clouds: number
 }
 
-const SortTable = ({ column, children }: { column: Column<Forecast>, children: React.ReactNode }) => {
+export const SortableColumn = ({ column, children }: { column: Column<Forecast>, children: React.ReactNode }) => {
     return <Button variant="ghost" onClick={() => {
       column.toggleSorting(column.getIsSorted() === "asc")}}>
       {children}
@@ -51,9 +51,9 @@ export const columns: ColumnDef<Forecast>[] = [
   {
     accessorKey: "dt",
     header: ({ column }) => {
-        return <SortTable column={column}>
+        return <SortableColumn column={column}>
             Date & Time
-        </SortTable>
+        </SortableColumn>
     },
     cell: ({ row }) => {
         const date = new Date(row.original.dt * 1000);
@@ -64,9 +64,9 @@ export const columns: ColumnDef<Forecast>[] = [
   {
     accessorKey: "temp",
     header: ({ column }) => {
-        return <SortTable column={column}>
+        return <SortableColumn column={column}>
             Temperature (°C)
-        </SortTable>
+        </SortableColumn>
     },
     cell: ({ row }) => {
         //Convert kelvin to celsius
@@ -78,9 +78,9 @@ export const columns: ColumnDef<Forecast>[] = [
   {
     accessorKey: "pressure",
     header: ({ column }) => {
-        return <SortTable column={column}>
+        return <SortableColumn column={column}>
             Pressure (hPa)
-        </SortTable>
+        </SortableColumn>
     },
     cell: ({ row }) => {
         return row.original.pressure.toFixed(2);
@@ -90,9 +90,9 @@ export const columns: ColumnDef<Forecast>[] = [
   {
     accessorKey: "humidity",
     header: ({ column }) => {
-        return <SortTable column={column}>
+        return <SortableColumn column={column}>
             Humidity (%)
-        </SortTable>
+        </SortableColumn>
     },
     cell: ({ row }) => {
         return row.original.humidity.toFixed(2);
@@ -102,9 +102,9 @@ export const columns: ColumnDef<Forecast>[] = [
   {
     accessorKey: "clouds",
     header: ({ column }) => {
-        return <SortTable column={column}>
+        return <SortableColumn column={column}>
             Clouds (%)
-        </SortTable>
+        </SortableColumn>
     },
     cell: ({ row }) => {
         return row.original.clouds.toFixed(2);

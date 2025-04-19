@@ -60,53 +60,53 @@ const DeviationDialog = ({ forecasts }: { forecasts: Forecast[] }) => {
     return null;
   }
   return (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent>
       <DialogHeader>
         <DialogTitle>Compare</DialogTitle>
       </DialogHeader>
-      <div className="flex flex-row gap-4 py-4">
-        {forecasts.map((forecast, index) => (
-          <div key={forecast.dt} className="flex flex-col gap-2">
-            <h1 className="text-lg font-bold">Report {index + 1}</h1>
-            <div>
-              <h1>Temperature</h1>
-              <h1>{forecast.temp}</h1>
-            </div>
-            <div>
-              <h1>Pressure</h1>
-              <h1>{forecast.pressure}</h1>
-            </div>
-            <div>
-              <h1>Humidity</h1>
-              <h1>{forecast.humidity}</h1>
-            </div>
-            <div>
-              <div>
-                <h1>Clouds</h1>
-                <h1>{forecast.clouds}</h1>
-              </div>
-            </div>
-          </div>
-        ))}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-lg font-bold">Deviation</h1>
-          <div>
-            <h1>Temperature</h1>
-            <h1>{Math.abs(forecasts[0].temp - forecasts[1].temp)}</h1>
-          </div>
-          <div>
-            <h1>Pressure</h1>
-            <h1>{Math.abs(forecasts[0].pressure - forecasts[1].pressure)}</h1>
-          </div>
-          <div>
-            <h1>Humidity</h1>
-            <h1>{Math.abs(forecasts[0].humidity - forecasts[1].humidity)}</h1>
-          </div>
-          <div>
-            <h1>Clouds</h1>
-            <h1>{Math.abs(forecasts[0].clouds - forecasts[1].clouds)}</h1>
-          </div>
-        </div>
+      <div className="py-4">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="border p-2 text-left">Property</th>
+              <th className="border p-2 text-left">Report 1</th>
+              <th className="border p-2 text-left">Report 2</th>
+              <th className="border p-2 text-left">Difference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border p-2 font-medium">Date</td>
+              <td className="border p-2">{new Date(forecasts[0].dt * 1000).toLocaleDateString() + " " + new Date(forecasts[0].dt * 1000).toLocaleTimeString()}</td>
+              <td className="border p-2">{new Date(forecasts[1].dt * 1000).toLocaleDateString() + " " + new Date(forecasts[1].dt * 1000).toLocaleTimeString()}</td>
+              <td className="border p-2">-</td>
+            </tr>
+            <tr>
+              <td className="border p-2 font-medium">Temperature</td>
+              <td className="border p-2">{forecasts[0].temp}</td>
+              <td className="border p-2">{forecasts[1].temp}</td>
+              <td className="border p-2">{Math.abs(forecasts[0].temp - forecasts[1].temp).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td className="border p-2 font-medium">Pressure</td>
+              <td className="border p-2">{forecasts[0].pressure}</td>
+              <td className="border p-2">{forecasts[1].pressure}</td>
+              <td className="border p-2">{Math.abs(forecasts[0].pressure - forecasts[1].pressure).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td className="border p-2 font-medium">Humidity</td>
+              <td className="border p-2">{forecasts[0].humidity}</td>
+              <td className="border p-2">{forecasts[1].humidity}</td>
+              <td className="border p-2">{Math.abs(forecasts[0].humidity - forecasts[1].humidity).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td className="border p-2 font-medium">Clouds</td>
+              <td className="border p-2">{forecasts[0].clouds}</td>
+              <td className="border p-2">{forecasts[1].clouds}</td>
+              <td className="border p-2">{Math.abs(forecasts[0].clouds - forecasts[1].clouds).toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </DialogContent>
   );

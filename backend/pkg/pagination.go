@@ -30,6 +30,7 @@ const (
 	FilterOperatorLt  FilterOperator = "lt"
 	FilterOperatorGte FilterOperator = "gte"
 	FilterOperatorLte FilterOperator = "lte"
+	FilterOperatorIn  FilterOperator = "in"
 )
 
 type SortOrder string
@@ -89,6 +90,8 @@ func ParseQueryOptions(c *gin.Context, config EndpointConfig) (QueryOptions, err
 				options.Filters[key][FilterOperatorGte] = value
 			case "lte":
 				options.Filters[key][FilterOperatorLte] = value
+			case "in":
+				options.Filters[key][FilterOperatorIn] = value
 			default:
 				return QueryOptions{}, fmt.Errorf("invalid filter operator: %s", operator)
 			}

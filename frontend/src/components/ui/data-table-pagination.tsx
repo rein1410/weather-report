@@ -8,6 +8,8 @@ import {
   PaginationState,
   SortingState,
   useReactTable,
+  RowSelectionState,
+  ColumnFiltersState,
   Table,
 } from "@tanstack/react-table";
 
@@ -20,18 +22,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState, useRef } from "react";
-
+import { useEffect, useState, useRef, ComponentType, createElement, Dispatch, SetStateAction   } from "react";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   queryFn: (
     pageIndex: number,
-    pageSize: number
+    pageSize: number,
+    sorting?: SortingState,
+    filter?: ColumnFiltersState
   ) => Promise<{ list: TData[]; total: number }>;
   rowCount: number;
   pageIndex?: number;
   pageSize?: number;
+  rowId?: string;
+  filterUI?: ComponentType<{
+    table: Table<TData>;
+    setFilter: Dispatch<SetStateAction<ColumnFiltersState>>;
+  }>;
 }
 
 export function DataTablePagination<TData, TValue>({
@@ -41,10 +49,14 @@ export function DataTablePagination<TData, TValue>({
   pageIndex,
   pageSize,
   queryFn,
+  filterUI,
+  rowId = "id",
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [data, setData] = useState<TData[]>(initialData || []);
   const [rowCount, setRowCount] = useState<number>(initialRowCount || 0);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: pageIndex ?? 0,
     pageSize: pageSize ?? 10,
@@ -57,14 +69,25 @@ export function DataTablePagination<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
     rowCount,
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
       pagination,
+      columnFilters,
+      rowSelection,
     },
     onPaginationChange: setPagination,
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
+    getRowId: (row) => {
+      // @ts-ignore - Access the rowId property dynamically
+      return String(row[rowId]);
+    },
   });
 
   useEffect(() => {
@@ -75,7 +98,12 @@ export function DataTablePagination<TData, TValue>({
 
     const fetchData = async () => {
       try {
-        const result = await queryFn(pagination.pageIndex, pagination.pageSize);
+        const result = await queryFn(
+          pagination.pageIndex, 
+          pagination.pageSize, 
+          sorting,
+          columnFilters
+        );
         if (result && typeof result === "object") {
           setData(result.list || []);
           setRowCount(result.total || 0);
@@ -92,10 +120,13 @@ export function DataTablePagination<TData, TValue>({
     };
 
     fetchData();
-  }, [pagination.pageIndex, pagination.pageSize, queryFn]);
+  }, [pagination.pageIndex, pagination.pageSize, sorting, columnFilters, queryFn]);
 
   return (
     <div>
+      <div className="flex items-center py-4">
+        {filterUI && createElement(filterUI, { table, setFilter: setColumnFilters })}
+      </div>
       <div className="rounded-md border">
         <TableComponent>
           <TableHeader>
