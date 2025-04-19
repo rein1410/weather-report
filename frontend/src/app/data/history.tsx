@@ -3,14 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-
-export type Forecast = {
-    dt: number
-    temp: number
-    pressure: number
-    humidity: number
-    clouds: number
-}
+import { Forecast } from "./forecast";
 
 export const columns: ColumnDef<Forecast>[] = [
   {
