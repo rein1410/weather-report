@@ -1,11 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
-import { Forecast, SortableColumn } from "./forecast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ForecastMenu } from "@/components/ui/forecast-menu";
+import { ColumnDef } from "@tanstack/react-table";
+import { Forecast, SortableColumn } from "./forecast";
 
 export const columns: ColumnDef<Forecast>[] = [
   {

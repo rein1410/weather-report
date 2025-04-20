@@ -85,7 +85,7 @@ export function DataTablePagination<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     enableRowSelection: true,
     getRowId: (row) => {
-      // @ts-ignore - Access the rowId property dynamically
+      // @ts-expect-error - Access the rowId property dynamically
       return String(row[rowId]);
     },
   });

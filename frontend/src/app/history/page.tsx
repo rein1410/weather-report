@@ -1,8 +1,7 @@
-import { Forecast } from "../data/forecast";
-import { columns } from "../data/history";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import { ForecastFilters } from "@/components/ui/forecast-filters";
+import { ColumnFiltersState, SortingState } from "@tanstack/react-table";
+import { columns } from "../data/history";
 export default async function History() {
     const page = 0;
     const limit = 10;
@@ -29,7 +28,7 @@ export default async function History() {
                 url += `&filters=${filterParams}`;
             }
             console.log(url);
-            const response = await fetch(url);
+            const response = await fetch(url, { cache: "no-store" });
             
             if (!response.ok) {
                 console.error(`Error fetching data: ${response.status} ${response.statusText}`);

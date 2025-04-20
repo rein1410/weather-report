@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "../data/forecast";
 export default async function Forecast() {
-    const forecast = await fetch(`${process.env.BACKEND_URL}/api/daily-forecast`);
+    const forecast = await fetch(`${process.env.BACKEND_URL}/api/daily-forecast`, { cache: "no-store" });
     const { list } = await forecast.json();
     return (
         <div className="container mx-auto py-10">
