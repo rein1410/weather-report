@@ -25,12 +25,13 @@ type QueryOptions struct {
 type FilterOperator string
 
 const (
-	FilterOperatorEq  FilterOperator = "eq"
-	FilterOperatorGt  FilterOperator = "gt"
-	FilterOperatorLt  FilterOperator = "lt"
-	FilterOperatorGte FilterOperator = "gte"
-	FilterOperatorLte FilterOperator = "lte"
-	FilterOperatorIn  FilterOperator = "in"
+	FilterOperatorEq      FilterOperator = "eq"
+	FilterOperatorGt      FilterOperator = "gt"
+	FilterOperatorLt      FilterOperator = "lt"
+	FilterOperatorGte     FilterOperator = "gte"
+	FilterOperatorLte     FilterOperator = "lte"
+	FilterOperatorIn      FilterOperator = "in"
+	FilterOperatorBetween FilterOperator = "between"
 )
 
 type SortOrder string
@@ -64,7 +65,7 @@ func ParseQueryOptions(c *gin.Context, config EndpointConfig) (QueryOptions, err
 	options.Offset = page * limit
 
 	if filterParam := c.Query("filters"); filterParam != "" {
-		filters := strings.Split(filterParam, ",")
+		filters := strings.Split(filterParam, ";")
 		for _, filter := range filters {
 			// example: dt:eq:2025-04-19
 			filter = strings.TrimSpace(filter)
@@ -92,6 +93,8 @@ func ParseQueryOptions(c *gin.Context, config EndpointConfig) (QueryOptions, err
 				options.Filters[key][FilterOperatorLte] = value
 			case "in":
 				options.Filters[key][FilterOperatorIn] = value
+			case "between":
+				options.Filters[key][FilterOperatorBetween] = value
 			default:
 				return QueryOptions{}, fmt.Errorf("invalid filter operator: %s", operator)
 			}

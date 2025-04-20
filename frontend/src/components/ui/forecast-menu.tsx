@@ -1,14 +1,5 @@
-import { Table } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Forecast } from "@/app/data/forecast";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,15 +7,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Table } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function ForecastMenu({ table }: { table: Table<Forecast> }) {
-  const forecasts =
-    table.getSelectedRowModel().rows.length > 0
-      ? table.getSelectedRowModel().rows.map(row => row.original)
-      : [];
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [forecasts, setForecasts] = useState<Forecast[]>([]);
   
+  useEffect(() => {
+    const selectedRows = Object.keys(table.getState().rowSelection);
+    if (selectedRows.length > forecasts.length) {
+      const newSelectedForecasts = selectedRows.filter(row => !forecasts.map(f => f.dt).includes(parseInt(row)));
+      const newForecast = table.getRow(newSelectedForecasts[0]).original;
+      setForecasts([...forecasts, newForecast]);
+    } else if (selectedRows.length < forecasts.length) {
+      const filteredForecasts = forecasts.filter(f => selectedRows.includes(f.dt.toString()));
+      setForecasts(filteredForecasts);
+    }
+  }, [table.getState().rowSelection]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,7 +48,7 @@ export function ForecastMenu({ table }: { table: Table<Forecast> }) {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <DropdownMenuItem
-              disabled={table.getSelectedRowModel().rows.length < 2}
+              disabled={forecasts.length < 2}
               onSelect={(e) => {
                 e.preventDefault();
                 setDialogOpen(true);

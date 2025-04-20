@@ -6,7 +6,6 @@ import { Table, ColumnFiltersState } from "@tanstack/react-table";
 import { DatePickerWithRange } from "./date-range-picker";
 import { DateRange } from "react-day-picker";
 import { Dispatch, SetStateAction, useState } from "react";
-import { addDays, subDays } from "date-fns";
 export function ForecastFilters({
   table,
   setFilter,

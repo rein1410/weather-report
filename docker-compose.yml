@@ -30,5 +30,19 @@ services:
     depends_on:
       - database
 
+  frontend:
+    image: weather-report-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    env_file:
+      - ./frontend/.env
+    environment:
+      - BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:

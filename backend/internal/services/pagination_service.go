@@ -35,7 +35,15 @@ func (s *PaginationService) QueryAndPaginate(model interface{}, options *paginat
 			case pagination.FilterOperatorLte:
 				query = query.Where(fmt.Sprintf("%s <= ?", field), value)
 			case pagination.FilterOperatorIn:
-				query = query.Where(fmt.Sprintf("%s IN (?)", field), strings.Split(value, ","))
+				values := strings.Split(value, ",")
+				interfaceValues := make([]interface{}, len(values))
+				for i, v := range values {
+					interfaceValues[i] = v
+				}
+				query = query.Where(fmt.Sprintf("%s IN (?)", field), interfaceValues)
+			case pagination.FilterOperatorBetween:
+				values := strings.Split(value, ",")
+				query = query.Where(fmt.Sprintf("%s BETWEEN ? AND ?", field), values[0], values[1])
 			}
 		}
 	}

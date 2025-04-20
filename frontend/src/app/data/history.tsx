@@ -14,7 +14,7 @@ export const columns: ColumnDef<Forecast>[] = [
       return <ForecastMenu table={table} />;
     },
     cell: ({ row, table }) => {
-      const selectedCount = table.getSelectedRowModel().rows.length;
+      const selectedCount = Object.keys(table.getState().rowSelection).length;
       const maxSelections = 2;
       const isSelected = row.getIsSelected();
 
