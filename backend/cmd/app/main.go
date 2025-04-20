@@ -6,8 +6,7 @@ import (
 	"time"
 	"weather-report/internal/database"
 	"weather-report/internal/models"
-	"weather-report/internal/services"
-	pagination "weather-report/pkg"
+	"weather-report/internal/routes"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,49 +38,10 @@ func main() {
 			})
 		})
 		api.GET("/daily-forecast", func(c *gin.Context) {
-			openweatherService := services.NewOpenWeatherService(db)
-			response, err := openweatherService.GetDailyForecast()
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-			c.JSON(http.StatusOK, response)
+			routes.GetDailyForecast(c, db)
 		})
 		api.GET("/history", func(c *gin.Context) {
-			config := pagination.EndpointConfig{
-				AllowedFilters: map[string]bool{
-					"dt":       true,
-					"temp":     true,
-					"pressure": true,
-					"humidity": true,
-					"clouds":   true,
-				},
-				AllowedSorts: map[string]bool{
-					"dt":       true,
-					"temp":     true,
-					"pressure": true,
-					"humidity": true,
-					"clouds":   true,
-				},
-			}
-			openweatherService := services.NewOpenWeatherService(db)
-			options, err := pagination.ParseQueryOptions(c, config)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-			response, err := openweatherService.GetHistory(options)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-			c.JSON(http.StatusOK, response)
+			routes.GetHistory(c, db)
 		})
 	}
 
