@@ -191,3 +191,25 @@ Response:
 - Frontend is built with Next.js and TypeScript
 - UI components use shadcn/ui
 - Data tables are implemented using TanStack Table
+
+## Testing
+
+### Frontend Testing
+
+The frontend uses Vitest and React Testing Library for testing. To run the tests:
+
+```bash
+cd frontend
+npm test
+```
+
+For more detailed information about testing, see the [Testing Documentation](frontend/__test__/README.md).
+
+### Backend Testing
+
+The backend uses Go's built-in testing framework. To run the tests:
+
+```bash
+cd backend
+go test ./tests
+```

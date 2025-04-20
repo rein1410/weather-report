@@ -27,7 +27,6 @@ export default async function History() {
                 }).join(';');
                 url += `&filters=${filterParams}`;
             }
-            console.log(url);
             const response = await fetch(url, { cache: "no-store" });
             
             if (!response.ok) {
