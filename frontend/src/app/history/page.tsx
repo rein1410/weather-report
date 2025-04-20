@@ -25,7 +25,7 @@ export default async function History() {
             if (filter && filter.length > 0) {
                 const filterParams = filter.map(filter => {
                     return filter.id + ":" + filter.value;
-                }).join(',');
+                }).join(';');
                 url += `&filters=${filterParams}`;
             }
             console.log(url);

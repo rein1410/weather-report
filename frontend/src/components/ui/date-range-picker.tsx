@@ -17,13 +17,13 @@ import {
 export function DatePickerWithRange({
   className,
   onDateChange,
+  date,
+  setDate,
 }: React.HTMLAttributes<HTMLDivElement> & {
+  date: DateRange | undefined;
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
   onDateChange: (date: DateRange | undefined) => void;
 }) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
-  })
 
   React.useEffect(() => {
     onDateChange(date);
