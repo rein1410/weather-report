@@ -5,7 +5,7 @@ import { Input } from "./input";
 import { Table, ColumnFiltersState } from "@tanstack/react-table";
 import { DatePickerWithRange } from "./date-range-picker";
 import { DateRange } from "react-day-picker";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 export function ForecastFilters({
   table,
   setFilter,
@@ -17,6 +17,11 @@ export function ForecastFilters({
     from: undefined,
     to: undefined,
   });
+
+  useEffect(() => {
+    console.log(date);
+  }, [date]);
+
   return (
     <div className="flex gap-2">
       <Input
@@ -52,11 +57,11 @@ export function ForecastFilters({
                 ...prev.filter(filter => filter.id !== "dt"),
                 { id: "dt", value: `between:${dateFrom},${dateTo}` },
               ]);
-            } else {
-              setFilter((prev: ColumnFiltersState) => [
-                ...prev.filter(filter => filter.id !== "dt"),
-              ]);
             }
+          } else {
+            setFilter((prev: ColumnFiltersState) => [
+              ...prev.filter(filter => filter.id !== "dt"),
+            ]);
           }
         }}
       />

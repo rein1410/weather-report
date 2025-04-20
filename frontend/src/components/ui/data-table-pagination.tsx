@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef, ComponentType, createElement, Dispatch, SetStateAction   } from "react";
+import { userAgent } from "next/server";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -61,6 +62,8 @@ export function DataTablePagination<TData, TValue>({
     pageIndex: pageIndex ?? 0,
     pageSize: pageSize ?? 10,
   });
+
+  useEffect(() => { console.log(columnFilters) }, [columnFilters]);
 
   const isInitialRender = useRef(true);
 
